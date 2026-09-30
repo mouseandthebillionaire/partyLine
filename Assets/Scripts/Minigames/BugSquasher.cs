@@ -11,12 +11,12 @@ public class BugSquasher : MonoBehaviour
 
 	private int correctKey, tempCorrectKey;
 	private int[] inputTimes = new int[3];
-	
-	// Start is called before the first frame update
-    void Start()
-    {
-	    StartCoroutine(RunGame());
-    }
+
+	public int gameLength = 20; // Seconds
+
+	public void Start() {
+		StartCoroutine(RunGame());
+	}
 
 	private IEnumerator MoveBug(GameObject _bug) {
 		while (_bug.GetComponent<Image>().color == Color.white) {
@@ -30,7 +30,7 @@ public class BugSquasher : MonoBehaviour
 
     private IEnumerator RunGame() {
 		// overall time based
-		int minigameLength = 20;
+		int minigameLength = gameLength;
 		float duration = Time.time + minigameLength;
 		
 		// game variables
@@ -61,23 +61,23 @@ public class BugSquasher : MonoBehaviour
 			
 			bool squashed = false;
 			int winner = -1;
-			for (int i = 0; i < MinigameManager.S.inputKeys.Length; i++) {
-				if (!squashed && MinigameManager.S.inputKeys[i] == correctKey) {
+			for (int i = 0; i < 12; i++) {
+				if (!squashed && PhoneInputManager.S.GetButtonDown(i, correctKey)) {
 					// First player to match this frame claims the bug
 					squashed = true;
 					winner = i;
 				}
-				MinigameManager.S.inputKeys[i] = 99;
+				//MinigameManager.S.inputKeys[i] = 99;
 			}
 
 			if (squashed) {
-				MinigameManager.S.UpdatePlayerScore(winner);
+				//MinigameManager.S.UpdatePlayerScore(winner);
 				GameObject go = GameObject.Find(bugKeys[correctKey].name + "/bug");
 				go.GetComponent<Image>().color = Color.clear;
 
 				GameObject splat = GameObject.Find(bugKeys[correctKey].name + "/splat");
 				splat.GetComponent<Image>().sprite = splats[Random.Range(0, splats.Length)];
-				splat.GetComponent<Image>().color = GlobalVariables.S.traderColors[winner];
+				splat.GetComponent<Image>().color = GlobalVariables.S.phoneColors[winner];
 				splatSound.Play();
 
 				bugPresent = false;

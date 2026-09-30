@@ -6,16 +6,20 @@ public class GlobalVariables : MonoBehaviour {
     public int             winner;
     public int             numPhones = 6;
     
-    public Color[]         phoneColors;
-    
-    /*
-    Red - #E90000
-    Yellow - #F8F61D
-    Blue - #145AFA
-    Orange - #ed7423
-    Green - #64804f
-    Black - #000
-    */
+    public Color[]         phoneColors = new Color[] {
+        Hex("#E90000"), // red
+        Hex("#F8F61D"), // yellow
+        Hex("#145AFA"), // blue
+        Hex("#ED7423"), // orange
+        Hex("#64804F"), // green
+        Hex("#000000")  // black
+    };
+
+    static Color Hex(string hex)
+    {
+        ColorUtility.TryParseHtmlString(hex, out Color color);
+        return color;
+    }
 
     
     public string[]        shortTeamNames = new string[3]{"NNF", "YU", "RRR"};
