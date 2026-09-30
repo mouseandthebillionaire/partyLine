@@ -22,10 +22,10 @@ public class GlobalVariables : MonoBehaviour {
     }
 
     
-    public string[]        shortTeamNames = new string[3]{"NNF", "YU", "RRR"};
+    public string[]        shortPhoneNames = new string[3]{"NNF", "YU", "RRR"};
 
-    public string[]        teamNames = new string[3]{
-        "Necktie, Necktie & Fleece", "Young Upstarts", "Rose & Rosen Rose"
+    public string[]        phoneNames = new string[6]{
+        "Abigail", "Brenda", "Carla", "Daniella", "Evangeline", "Felicty"
     };
 
 	// Keep track of which minigames have been played 

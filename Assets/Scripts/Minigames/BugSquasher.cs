@@ -67,11 +67,11 @@ public class BugSquasher : MonoBehaviour
 					squashed = true;
 					winner = i;
 				}
-				//MinigameManager.S.inputKeys[i] = 99;
+				MinigameManager.S.inputKeys[i] = 99;
 			}
 
 			if (squashed) {
-				//MinigameManager.S.UpdatePlayerScore(winner);
+				MinigameManager.S.UpdatePlayerScore(winner);
 				GameObject go = GameObject.Find(bugKeys[correctKey].name + "/bug");
 				go.GetComponent<Image>().color = Color.clear;
 
