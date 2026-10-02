@@ -566,14 +566,17 @@ MonoBehaviour:
   - {r: 0.92941177, g: 0.45490196, b: 0.13725491, a: 1}
   - {r: 0.39215687, g: 0.5019608, b: 0.30980393, a: 1}
   - {r: 0, g: 0, b: 0, a: 1}
-  shortTeamNames:
+  shortPhoneNames:
   - NNF
   - YU
   - RRR
-  teamNames:
-  - Necktie, Necktie & Fleece
-  - Young Upstarts
-  - Rose & Rosen Rose
+  phoneNames:
+  - Abigail
+  - Brenda
+  - Carla
+  - Daniella
+  - Evangeline
+  - Felicty
   minigameIndexes: 
   keyNames:
   - 0
@@ -619,6 +622,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb65498e49eb24b81b32ff7c16ce58bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  currentMinigame: 0
   currentState: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

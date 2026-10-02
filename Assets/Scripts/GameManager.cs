@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {    
+    public int currentMinigame;
+    
     public static GameManager S;
     
     public enum State

@@ -61,7 +61,7 @@ public class BugSquasher : MonoBehaviour
 			
 			bool squashed = false;
 			int winner = -1;
-			for (int i = 0; i < 12; i++) {
+			for (int i = 0; i < GlobalVariables.S.numPhones; i++) {
 				if (!squashed && PhoneInputManager.S.GetButtonDown(i, correctKey)) {
 					// First player to match this frame claims the bug
 					squashed = true;
