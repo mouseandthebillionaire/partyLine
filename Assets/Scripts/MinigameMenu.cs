@@ -25,6 +25,7 @@ public class MinigameMenu : MonoBehaviour
     {
         Debug.Log("Launching " + minigameNames[minigameIndex]);
         GameManager.S.currentMinigame = minigameIndex;
+        GameManager.S.currentState = GameManager.State.MINIGAME;
         SceneManager.LoadScene("Minigame");
     }
 }

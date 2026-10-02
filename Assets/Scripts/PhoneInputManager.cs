@@ -27,8 +27,8 @@ public class PhoneInputManager : MonoBehaviour
         1, 2, 3, 4, 5, 6, 7, 8, 9,
         11, // *
         12, // #
-        14, // pickup
-        15, // hangup
+        15, // pickup
+        14, // hangup
         13, // yell
     };
 

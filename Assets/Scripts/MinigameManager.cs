@@ -21,7 +21,7 @@ public class MinigameManager : MonoBehaviour
     public GameObject   winnerDisplay;
 
     // Audio
-    public AudioSource coin;
+    public AudioSource coin, zilch;
 
     // Timer
     public TextMeshProUGUI timerText;
@@ -29,8 +29,12 @@ public class MinigameManager : MonoBehaviour
 
     // Minigames
     public GameObject[] minigames;  
+    public string[] minigameNames;
     public int currentMinigame = 0;
 
+    // For testing
+    public bool testMode = false;
+    public int testMinigame = 0;
 
     public static MinigameManager S;
 
@@ -46,11 +50,15 @@ public class MinigameManager : MonoBehaviour
     }
 
     private void LoadMinigame() {
-        game = minigames[GameManager.S.currentMinigame];
+
+        game = minigames[testMode ? testMinigame : GameManager.S.currentMinigame];
+        currentMinigame = testMode ? testMinigame : GameManager.S.currentMinigame;
         game.SetActive(false);
     }
 
 	private IEnumerator ShowTitle() {
+        // Show the title text
+        gameTitle.GetComponent<TextMeshProUGUI>().text = minigameNames[currentMinigame];
         // Randomly rotate the title slightly
         gameTitle.transform.rotation = Quaternion.Euler(0, 0, Random.Range(-20f, 20f));
 		gameTitle.SetActive(false);
@@ -74,10 +82,11 @@ public class MinigameManager : MonoBehaviour
     }
 
 
-    public void EndGame() {
-        int winner = CalculateScore();
+    public void EndGame(int? winner = null) {
+        if (!winner.HasValue)
+            winner = CalculateScore();
 		game.SetActive(false);
-        StartCoroutine(AnnounceWinner(winner));
+        StartCoroutine(AnnounceWinner(winner.Value));
 	}
 
     private IEnumerator AnnounceWinner(int _winner) {
@@ -85,6 +94,9 @@ public class MinigameManager : MonoBehaviour
         inputDisplay.SetActive(false);
         // Show the winnerDisplay
         winnerDisplay.SetActive(true);
+        if (_winner == 99)
+            winnerDisplay.GetComponent<TextMeshProUGUI>().text = "nobody wins";
+        else
         winnerDisplay.GetComponent<TextMeshProUGUI>().text = GlobalVariables.S.phoneNames[_winner] + " wins!";
         // Randomly rotate the winnerDisplay
         winnerDisplay.transform.rotation = Quaternion.Euler(0, 0, Random.Range(-20f, 20f));
@@ -94,6 +106,7 @@ public class MinigameManager : MonoBehaviour
         winnerDisplay.SetActive(false);
         yield return new WaitForSeconds(1f);
         // Go back to the menu for now (but later maybe there's an version that runs through a few minigames?)
+        GameManager.S.currentState = GameManager.State.MENU;
         SceneManager.LoadScene("Main");
     }
 

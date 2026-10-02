@@ -2,13 +2,13 @@ using UnityEngine;
 
 public class PhoneControl : MonoBehaviour
 {
-    //   Buttons 1-9  = digits 1-9
-    //   Button  10   = digit 0
-    //   Button  11   = *
-    //   Button  12   = #
-    //   Button  13   = yell
-    //   Button  14   = pickup  
-    //   Button  15   = hangup 
+    //    10, // 0
+    //    1, 2, 3, 4, 5, 6, 7, 8, 9,
+    //    11, // *
+    //    12, // #
+    //    15, // pickup
+    //    14, // hangup
+    //    13, // yell
     
     public int phoneNum;
 
@@ -31,11 +31,13 @@ public class PhoneControl : MonoBehaviour
                     if (inputString.Length > MinigameMenu.S.minigameNumberLength)
                         inputString = inputString.Substring(inputString.Length - MinigameMenu.S.minigameNumberLength, MinigameMenu.S.minigameNumberLength);
                     Debug.Log("Phone " + phoneNum + " pressed " + inputString);
-                    if (inputString == MinigameMenu.S.minigameNumbers[0])
-                    {
-                        Debug.Log("Phone " + phoneNum + " pressed " + MinigameMenu.S.minigameNumbers[0]);
-                        MinigameMenu.S.LaunchMinigame(0);
-                    }
+                }
+            }
+
+            for (int i = 0; i < MinigameMenu.S.minigameNumbers.Length; i++){
+                if (inputString == MinigameMenu.S.minigameNumbers[i]){
+                    Debug.Log("Phone " + phoneNum + " pressed " + MinigameMenu.S.minigameNumbers[i]);
+                    MinigameMenu.S.LaunchMinigame(i);
                 }
             }
         }
