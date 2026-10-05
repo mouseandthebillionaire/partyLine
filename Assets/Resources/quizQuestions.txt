@@ -1,0 +1,107 @@
+2#Which planet is known for its bright rings?
+  1. Mars
+  2. Saturn
+  3. Venus
+  4. Mercury
+
+2#How many legs does a spider have?
+  1. Six
+  2. Eight
+  3. Four
+  4. Ten
+
+3#What color do you get when you mix red and yellow?
+  1. Green
+  2. Purple
+  3. Orange
+  4. Brown
+
+4#Which of these animals is a mammal?
+  1. Shark
+  2. Frog
+  3. Eagle
+  4. Dolphin
+
+3#What is the largest ocean on Earth?
+  1. Atlantic Ocean
+  2. Indian Ocean
+  3. Pacific Ocean
+  4. Arctic Ocean
+
+1#How many sides does a triangle have?
+  1. Three
+  2. Four
+  3. Five
+  4. Six
+
+3#Which of these is a vegetable?
+  1. Apple
+  2. Banana
+  3. Carrot
+  4. Strawberry
+
+2#What do bees make?
+  1. Milk
+  2. Honey
+  3. Wool
+  4. Silk
+
+3#Which season comes right after winter?
+  1. Summer
+  2. Fall
+  3. Spring
+  4. Winter
+
+4#What is the capital of Japan?
+  1. Seoul
+  2. Beijing
+  3. Bangkok
+  4. Tokyo
+
+2#Which gas do plants take in when they make food from sunlight?
+  1. Oxygen
+  2. Carbon dioxide
+  3. Helium
+  4. Hydrogen
+
+2#How many days are in a leap year?
+  1. 365
+  2. 366
+  3. 364
+  4. 360
+
+3#Which instrument has black and white keys?
+  1. Drum
+  2. Flute
+  3. Piano
+  4. Violin
+
+2#What is frozen water called?
+  1. Steam
+  2. Ice
+  3. Rain
+  4. Fog
+
+3#Which of these animals can fly?
+  1. Penguin
+  2. Ostrich
+  3. Bat
+  4. Kiwi
+
+2#What is 7 times 8?
+  1. 54
+  2. 56
+  3. 63
+  4. 48
+
+4#Which continent is the Sahara Desert on?
+  1. Asia
+  2. Australia
+  3. South America
+  4. Africa
+
+3#What do you call a baby dog?
+  1. Kitten
+  2. Cub
+  3. Puppy
+  4. Calf
