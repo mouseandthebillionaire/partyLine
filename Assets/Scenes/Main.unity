@@ -1103,7 +1103,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3cb2da16b23d4898bd552af23a72f80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PhoneInputManager
-  logButtonPresses: 0
+  logButtonPresses: 1
   phoneDeviceIds: 0d0000000e000000
 --- !u!4 &1509233572
 Transform:

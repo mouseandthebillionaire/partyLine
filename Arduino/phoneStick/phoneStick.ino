@@ -35,15 +35,15 @@ AudioConnection          patchCord7(mixer1, 0, i2s2, 1);
 AudioControlSGTL5000     sgtl5000_1;
 // GUItool: end automatically generated code
 
-float yellThreshold = 0.3;
+float yellOnThreshold = 0.8;
+float yellOffThreshold = 0.35;
+const unsigned long yellReleaseMs = 150;
 float toneVol = 0.5;
-
-unsigned long prevMillis1 = 0;
-const long interval1 = 300;
 
 bool dialToneOn = false;
 bool busySignalOn = false;
 bool yellHeld = false;
+unsigned long yellQuietSince = 0;
 
 int receiverState;
 
@@ -219,22 +219,32 @@ void pickupHangup() {
 }
 
 void checkRMS() {
-  unsigned long now = millis();
-  if (now - prevMillis1 < interval1) return;
-  prevMillis1 = now;
-
   if (!rms1.available()) return;
   float rms = rms1.read();
-  bool yelling = rms > yellThreshold;
 
-  if (yelling != yellHeld) {
-    yellHeld = yelling;
-    setButton(BTN_YELL, yelling);
-    if (yelling) {
-      Serial.print(F("yell → btn "));
-      Serial.println(BTN_YELL);
-      Serial.println(rms);
-    }
+  if (!yellHeld) {
+    if (rms < yellOnThreshold) return;
+    yellHeld = true;
+    yellQuietSince = 0;
+    setButton(BTN_YELL, true);
+    Serial.print(F("yell → btn "));
+    Serial.println(BTN_YELL);
+    Serial.println(rms);
+    return;
+  }
+
+  // Stay held until the mic stays under the lower threshold
+  if (rms >= yellOffThreshold) {
+    yellQuietSince = 0;
+    return;
+  }
+
+  if (yellQuietSince == 0)
+    yellQuietSince = millis();
+  else if (millis() - yellQuietSince >= yellReleaseMs) {
+    yellHeld = false;
+    yellQuietSince = 0;
+    setButton(BTN_YELL, false);
   }
 }
 
