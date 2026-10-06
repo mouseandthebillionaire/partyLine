@@ -204,4 +204,10 @@ public class PhoneInputManager : MonoBehaviour
         if ((uint)phoneNum >= MaxPhones || (uint)buttonIndex >= NumButtons) return false;
         return _isHeld[phoneNum, buttonIndex];
     }
+
+    public bool HasDevice(int phoneNum)
+    {
+        if ((uint)phoneNum >= MaxPhones) return false;
+        return _devices[phoneNum] != null;
+    }
 }

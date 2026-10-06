@@ -71,7 +71,7 @@ const uint8_t BTN_HANGUP = 15;
 #define PHONE_GREEN  2
 #define PHONE_RED    3
 #define PHONE_ORANGE 4
-#define PHONE_WIRING PHONE_BLUE
+#define PHONE_WIRING PHONE_RED
 
 #if PHONE_WIRING == PHONE_BLUE
 byte rowPins[ROWS] = {5, 6, 7, 8};

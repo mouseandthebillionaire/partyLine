@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d9308ff2114e43f38ceda0d04d7f7ff, type: 3}
+  m_Name: PriceCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::PriceCatalog
+  items:
+  - itemName: Yow Cola
+    image: {fileID: 21300000, guid: 1cfe3fd58cc9941ec8c82defaeec16be, type: 3}
+    price: 2.99
