@@ -36,8 +36,8 @@ AudioControlSGTL5000     sgtl5000_1;
 // GUItool: end automatically generated code
 
 float yellOnThreshold = 0.8;
-float yellOffThreshold = 0.35;
-const unsigned long yellReleaseMs = 150;
+// Drop below the scream threshold for this long and the yell button releases
+const unsigned long yellReleaseMs = 40;
 float toneVol = 0.5;
 
 bool dialToneOn = false;
@@ -222,10 +222,10 @@ void checkRMS() {
   if (!rms1.available()) return;
   float rms = rms1.read();
 
-  if (!yellHeld) {
-    if (rms < yellOnThreshold) return;
-    yellHeld = true;
+  if (rms >= yellOnThreshold) {
     yellQuietSince = 0;
+    if (yellHeld) return;
+    yellHeld = true;
     setButton(BTN_YELL, true);
     Serial.print(F("yell → btn "));
     Serial.println(BTN_YELL);
@@ -233,11 +233,7 @@ void checkRMS() {
     return;
   }
 
-  // Stay held until the mic stays under the lower threshold
-  if (rms >= yellOffThreshold) {
-    yellQuietSince = 0;
-    return;
-  }
+  if (!yellHeld) return;
 
   if (yellQuietSince == 0)
     yellQuietSince = millis();

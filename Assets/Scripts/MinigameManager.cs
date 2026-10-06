@@ -96,8 +96,10 @@ public class MinigameManager : MonoBehaviour
         winnerDisplay.SetActive(true);
         if (_winner == 99)
             winnerDisplay.GetComponent<TextMeshProUGUI>().text = "nobody wins";
+        else if (_winner == 98)
+            winnerDisplay.GetComponent<TextMeshProUGUI>().text = "it's a tie";
         else
-        winnerDisplay.GetComponent<TextMeshProUGUI>().text = GlobalVariables.S.phoneNames[_winner] + " wins!";
+            winnerDisplay.GetComponent<TextMeshProUGUI>().text = GlobalVariables.S.phoneNames[_winner] + " wins!";
         // Randomly rotate the winnerDisplay
         winnerDisplay.transform.rotation = Quaternion.Euler(0, 0, Random.Range(-20f, 20f));
         // Wait for 2 seconds
