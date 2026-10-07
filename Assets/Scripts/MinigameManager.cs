@@ -53,7 +53,8 @@ public class MinigameManager : MonoBehaviour
 
         game = minigames[testMode ? testMinigame : GameManager.S.currentMinigame];
         currentMinigame = testMode ? testMinigame : GameManager.S.currentMinigame;
-        game.SetActive(false);
+        // Set the Background Color (Camera.main.backgroundColor)
+        Camera.main.backgroundColor = GlobalVariables.S.gameColors[currentMinigame];
     }
 
 	private IEnumerator ShowTitle() {

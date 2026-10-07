@@ -22,8 +22,12 @@ public class PhoneControl : MonoBehaviour
         // if we are in the menu
         if (GameManager.S.currentState == GameManager.State.MENU)
         {
+            if (MinigameMenu.S == null) return;
+
+            bool pressed = false;
             for (int i = 0; i < GlobalVariables.S.keyNames.Length-3; i++){ // -3 because we don't want to include pickup, hangup, or yell
                 if (PhoneInputManager.S.GetButtonDown(phoneNum, i)){
+                    pressed = true;
                     inputString += GlobalVariables.S.keyNames[i];
 
                     // Keep only the last few digits once the buffer is long enough.
@@ -34,10 +38,14 @@ public class PhoneControl : MonoBehaviour
                 }
             }
 
+            if (!pressed) return;
+
             for (int i = 0; i < MinigameMenu.S.minigameNumbers.Length; i++){
                 if (inputString == MinigameMenu.S.minigameNumbers[i]){
+                    inputString = "";
                     Debug.Log("Phone " + phoneNum + " pressed " + MinigameMenu.S.minigameNumbers[i]);
                     MinigameMenu.S.LaunchMinigame(i);
+                    return;
                 }
             }
         }

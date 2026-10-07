@@ -15,6 +15,8 @@ public class GlobalVariables : MonoBehaviour {
         Hex("#000000")  // black
     };
 
+    public Color[]         gameColors = new Color[9];
+
     static Color Hex(string hex)
     {
         ColorUtility.TryParseHtmlString(hex, out Color color);

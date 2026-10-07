@@ -8,6 +8,8 @@ public class Quizshow : MonoBehaviour
     
 	// Eventually do this from the RESOURCES folder.
 	private string[] questions;
+	private int[] deck;
+	private int deckIndex;
 
 	private int numPhones;
 	public int numQuestions = 5;
@@ -35,6 +37,7 @@ public class Quizshow : MonoBehaviour
 				loaded.Add(trimmed);
 		}
 		questions = loaded.ToArray();
+		ShuffleDeck();
 		
 		answered = new bool[numPhones, numQuestions];
 		unanswered = new bool[numQuestions];
@@ -121,8 +124,10 @@ public class Quizshow : MonoBehaviour
 	}
 
     private void AskQuestion(int question) {
-		// Get a random question and answer
-		string questionAnswerCombo = questions[Random.Range(0, questions.Length)];
+		if (deckIndex >= deck.Length)
+			ShuffleDeck();
+
+		string questionAnswerCombo = questions[deck[deckIndex++]];
 		// The answer is at the beginning of the string
 		correctKey = int.Parse(questionAnswerCombo.Split('#')[0]);
 		string questionText = questionAnswerCombo.Split('#')[1];
@@ -130,7 +135,7 @@ public class Quizshow : MonoBehaviour
 		if (lineBreak >= 0)
 			questionText = questionText.Substring(0, lineBreak) + "\n" + questionText.Substring(lineBreak);
 		Debug.Log(correctKey);
-		equation.text = (question + 1) + ")" + questionText;
+		equation.text = (question + 1) + ") " + questionText;
 
 		numAnswered = 0;
 		for (int i = 0; i < numPhones; i++) {
@@ -140,6 +145,19 @@ public class Quizshow : MonoBehaviour
 
 		questionStart = Time.time;
 		unanswered[question] = true;
+	}
+
+	void ShuffleDeck() {
+		deck = new int[questions.Length];
+		for (int i = 0; i < deck.Length; i++)
+			deck[i] = i;
+		for (int i = deck.Length - 1; i > 0; i--) {
+			int j = Random.Range(0, i + 1);
+			int swap = deck[i];
+			deck[i] = deck[j];
+			deck[j] = swap;
+		}
+		deckIndex = 0;
 	}
 
 	// Digit buttons are key indexes 0-9. Returns -1 when this phone pressed none of them.

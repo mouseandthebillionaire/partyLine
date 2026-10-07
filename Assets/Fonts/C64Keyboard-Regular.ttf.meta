@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 8aedd18ab2fed42999110731bc07b176
+guid: 46b5172d984b1488cac6637e4d741b81
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - partyline
+  - C64 Keyboard
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
