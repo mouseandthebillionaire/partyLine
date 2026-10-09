@@ -1,11 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class SayIt : MonoBehaviour
 {
     public bool[] yelling;
     private int phones;
+
+	public string[] words;
+	public TextMeshProUGUI wordText;
 
 	void Start() {
         phones = GlobalVariables.S.numPhones;   
@@ -17,13 +21,13 @@ public class SayIt : MonoBehaviour
     private IEnumerator RunGame() {
 		// How long are we playing this game for?
 		int holdSeconds = 5;
-		// keyNames index 14 is YELL (Teensy joystick button 13)
-		const int yellKey = 14;
+		string currWord = words[Random.Range(0, words.Length)];	
+		wordText.text = currWord;
 
 
 		if (PhoneInputManager.S != null) {
 			for (int i = 0; i < phones; i++)
-				yelling[i] = PhoneInputManager.S.GetButton(i, yellKey);
+				yelling[i] = PhoneInputManager.S.IsYelling(i);
 		}
 
 		float duration = Time.time + holdSeconds;
@@ -31,7 +35,7 @@ public class SayIt : MonoBehaviour
 		while (duration > Time.time) {
 			if (PhoneInputManager.S != null) {
 				for (int i = 0; i < phones; i++) {
-					bool yellingNow = PhoneInputManager.S.GetButton(i, yellKey);
+					bool yellingNow = PhoneInputManager.S.IsYelling(i);
 					if (yellingNow && !yelling[i])
 						MinigameManager.S.UpdatePlayerScore(i);
 					yelling[i] = yellingNow;

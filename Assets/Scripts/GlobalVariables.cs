@@ -5,6 +5,7 @@ public class GlobalVariables : MonoBehaviour {
 
     public int             winner;
     public int             numPhones = 6;
+    public bool[]          loggedIn = new bool[6];
     
     public Color[]         phoneColors = new Color[] {
         Hex("#E90000"), // red
@@ -39,7 +40,7 @@ public class GlobalVariables : MonoBehaviour {
     // Star (10), Pound(11), Pickup(12), Hangup(13), Yell(14)
 
     public string[]        keyNames = new string[]
-        {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "#", "⬆", "⬇", "YELL"};
+        {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "#", "⬆", "⬇", "YELL", "YELLVOL"};
         
     public KeyCode[,]      inputKeys = new KeyCode[,] {
         {KeyCode.X, KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3, KeyCode.Q,    // 0-4
@@ -66,7 +67,14 @@ public class GlobalVariables : MonoBehaviour {
     {
        if (S == null) {
            S = this;
+           if (loggedIn == null || loggedIn.Length != numPhones)
+               loggedIn = new bool[numPhones];
        }
+    }
+
+    public bool IsLoggedIn(int phone)
+    {
+        return loggedIn != null && (uint)phone < (uint)loggedIn.Length && loggedIn[phone];
     }
 
 }

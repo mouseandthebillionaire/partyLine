@@ -11,9 +11,6 @@ public class Yeeell : MonoBehaviour
 	}
 
 	private IEnumerator RunGame() {
-		// keyNames index 14 is YELL (Teensy joystick button 13)
-		const int yellKey = 14;
-
 		float[] screamed = new float[phones];
 		bool[] yelling = new bool[phones];
 		bool[] stopped = new bool[phones];
@@ -34,12 +31,12 @@ public class Yeeell : MonoBehaviour
 					if (stopped[i])
 						continue;
 
-					bool yellingNow = PhoneInputManager.S.GetButton(i, yellKey);
+					bool yellingNow = PhoneInputManager.S.IsYelling(i);
 					if (yellingNow && !yelling[i]) {
 						anyoneScreamed = true;
 						Debug.Log("phone " + i + " scream start");
 					}
-					// A dip or a stop releases the yell button. That scream is over.
+					// A dip under the yell threshold ends that scream.
 					if (yelling[i] && !yellingNow) {
 						stopped[i] = true;
 						stoppedThisFrame++;

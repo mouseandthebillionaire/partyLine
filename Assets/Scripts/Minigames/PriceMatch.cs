@@ -47,7 +47,7 @@ public class PriceMatch : MonoBehaviour
         if (current == null || PhoneInputManager.S == null || GlobalVariables.S == null) return;
 
         for (int phone = 0; phone < phones; phone++) {
-            if (submitted[phone])
+            if (!IsPlaying(phone) || submitted[phone])
                 continue;
 
             if (PhoneInputManager.S.GetButtonDown(phone, starKey)) {
@@ -89,11 +89,11 @@ public class PriceMatch : MonoBehaviour
             SetDisplayColor(phone, GlobalVariables.S.phoneColors[phone]);
 
         for (int i = 0; i < phones; i++) {
-            if (PhoneInputManager.S.HasDevice(i) && !submitted[i])
+            if (IsPlaying(i) && !submitted[i])
                 return;
         }
 
-        // We reach here if everyone has pressed/entered their price.
+        // Every phone that logged in has entered a price.
         // TODO: An animation to show the real price (and maybe the differences?)
         StartCoroutine(SendClosest(actual));
     }
@@ -112,6 +112,11 @@ public class PriceMatch : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         MinigameManager.S.EndGame();
+    }
+
+    bool IsPlaying(int phone)
+    {
+        return GlobalVariables.S != null && GlobalVariables.S.IsLoggedIn(phone);
     }
 
     void ShowPrice(int phone, string raw)
