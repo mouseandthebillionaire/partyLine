@@ -5,6 +5,7 @@ public class GlobalVariables : MonoBehaviour {
 
     public int             winner;
     public int             numPhones = 6;
+    public bool[]          loggedIn = new bool[6];
     
     public Color[]         phoneColors = new Color[] {
         Hex("#E90000"), // red
@@ -66,7 +67,14 @@ public class GlobalVariables : MonoBehaviour {
     {
        if (S == null) {
            S = this;
+           if (loggedIn == null || loggedIn.Length != numPhones)
+               loggedIn = new bool[numPhones];
        }
+    }
+
+    public bool IsLoggedIn(int phone)
+    {
+        return loggedIn != null && (uint)phone < (uint)loggedIn.Length && loggedIn[phone];
     }
 
 }

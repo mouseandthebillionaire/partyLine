@@ -55,6 +55,7 @@ public class MinigameManager : MonoBehaviour
         currentMinigame = testMode ? testMinigame : GameManager.S.currentMinigame;
         // Set the Background Color (Camera.main.backgroundColor)
         Camera.main.backgroundColor = GlobalVariables.S.gameColors[currentMinigame];
+        MinigameMenu.ClearLaunchFill();
     }
 
 	private IEnumerator ShowTitle() {
@@ -80,6 +81,12 @@ public class MinigameManager : MonoBehaviour
 
     private void ShowInputDisplay() {
         inputDisplay.SetActive(true);
+        if (GlobalVariables.S == null) return;
+
+        for (int i = 0; i < inputDisplayObjects.Length; i++) {
+            if (GlobalVariables.S.IsLoggedIn(i)) continue;
+            inputDisplayObjects[i].GetComponent<Image>().color = Color.grey;
+        }
     }
 
 
@@ -109,6 +116,7 @@ public class MinigameManager : MonoBehaviour
         winnerDisplay.SetActive(false);
         yield return new WaitForSeconds(1f);
         // Go back to the menu for now (but later maybe there's an version that runs through a few minigames?)
+        MinigameMenu.ClearLaunchFill();
         GameManager.S.currentState = GameManager.State.MENU;
         SceneManager.LoadScene("Main");
     }

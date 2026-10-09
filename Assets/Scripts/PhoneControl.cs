@@ -24,6 +24,16 @@ public class PhoneControl : MonoBehaviour
         {
             if (MinigameMenu.S == null) return;
 
+            // Key index 0 is the 0 button. That logs this phone in.
+            if (!MinigameMenu.S.IsLoggedIn(phoneNum)) {
+                if (PhoneInputManager.S.GetButtonDown(phoneNum, 0)) {
+                    inputString = "";
+                    MinigameMenu.S.LogIn(phoneNum);
+                    MinigameMenu.S.SetPhoneDigits(phoneNum, inputString);
+                }
+                return;
+            }
+
             bool pressed = false;
             for (int i = 0; i < GlobalVariables.S.keyNames.Length-3; i++){ // -3 because we don't want to include pickup, hangup, or yell
                 if (PhoneInputManager.S.GetButtonDown(phoneNum, i)){
@@ -39,6 +49,8 @@ public class PhoneControl : MonoBehaviour
             }
 
             if (!pressed) return;
+
+            MinigameMenu.S.SetPhoneDigits(phoneNum, inputString);
 
             for (int i = 0; i < MinigameMenu.S.minigameNumbers.Length; i++){
                 if (inputString == MinigameMenu.S.minigameNumbers[i]){
