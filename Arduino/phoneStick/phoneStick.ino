@@ -13,9 +13,10 @@
 //   Button  10   = digit 0
 //   Button  11   = *
 //   Button  12   = #
-//   Button  13   = yell
+//   Button  13   = yell (on/off, unchanged)
 //   Button  14   = pickup   (+ hat North pulse)
 //   Button  15   = hangup   (+ hat South pulse)
+//   Slider       = mic loudness, 0-1023 (independent of button 13)
 
 // GUItool: begin automatically generated code
 AudioSynthWaveformSine   sine1;
@@ -38,6 +39,14 @@ AudioControlSGTL5000     sgtl5000_1;
 float yellOnThreshold = 0.8;
 // Drop below the scream threshold for this long and the yell button releases
 const unsigned long yellReleaseMs = 40;
+// RMS at/under this maps to slider 0. Full-scale mic maps to 1023, so the
+// axis still moves after button 13 has already turned on.
+float yellNoiseFloor = 0.02f;
+float yellCeiling = 1.0f;
+float yellLevel = 0.0f;
+const unsigned long yellAxisMs = 20;
+unsigned long lastRmsMs = 0;
+unsigned long lastAxisSendMs = 0;
 float toneVol = 0.5;
 
 bool dialToneOn = false;
@@ -156,6 +165,7 @@ void setup() {
 
   Joystick.useManualSend(false);
   clearAllButtons();
+  Joystick.slider(0);
 
   Serial.print(F("phoneStick  PHONE_WIRING="));
   Serial.println(PHONE_WIRING);
@@ -218,9 +228,31 @@ void pickupHangup() {
   }
 }
 
+void sendYellLevel(float rms) {
+  float span = yellCeiling - yellNoiseFloor;
+  float norm = 0.0f;
+  if (span > 0.0f)
+    norm = constrain((rms - yellNoiseFloor) / span, 0.0f, 1.0f);
+
+  unsigned long now = millis();
+  float dt = lastRmsMs ? (float)(now - lastRmsMs) : 3.0f;
+  lastRmsMs = now;
+
+  // Jump up with the mic. Release over ~80ms so one audio block doesn't flicker the axis.
+  if (norm >= yellLevel)
+    yellLevel = norm;
+  else
+    yellLevel += (norm - yellLevel) * (dt / (dt + 80.0f));
+
+  if (now - lastAxisSendMs < yellAxisMs) return;
+  lastAxisSendMs = now;
+  Joystick.slider((int)(yellLevel * 1023.0f + 0.5f));
+}
+
 void checkRMS() {
   if (!rms1.available()) return;
   float rms = rms1.read();
+  sendYellLevel(rms);
 
   if (rms >= yellOnThreshold) {
     yellQuietSince = 0;

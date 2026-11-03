@@ -64,7 +64,7 @@ public class Quizshow : MonoBehaviour
 		if (PhoneInputManager.S == null) return;
 
 		for (int i = 0; i < numPhones; i++) {
-			if (answered[i, currentQuestion]) continue;
+			if (!IsPlaying(i) || answered[i, currentQuestion]) continue;
 
 			int pressed = PressedDigit(i);
 			if (pressed < 0) continue;
@@ -79,7 +79,7 @@ public class Quizshow : MonoBehaviour
 			MinigameManager.S.inputDisplayObjects[i].GetComponent<Image>().color = Color.grey;
 			MinigameManager.S.zilch.Play();
 			numAnswered++;
-			if (numAnswered == numPhones) {
+			if (numAnswered == PlayingCount()) {
 				// Nobody Got it!
 				StartCoroutine(NobodyGotIt());
 				return;
@@ -139,8 +139,11 @@ public class Quizshow : MonoBehaviour
 
 		numAnswered = 0;
 		for (int i = 0; i < numPhones; i++) {
-			if (GlobalVariables.S != null)
-				MinigameManager.S.inputDisplayObjects[i].GetComponent<Image>().color = GlobalVariables.S.phoneColors[i];
+			Image box = MinigameManager.S.inputDisplayObjects[i].GetComponent<Image>();
+			if (IsPlaying(i))
+				box.color = GlobalVariables.S.phoneColors[i];
+			else
+				box.color = Color.grey;
 		}
 
 		questionStart = Time.time;
@@ -158,6 +161,19 @@ public class Quizshow : MonoBehaviour
 			deck[j] = swap;
 		}
 		deckIndex = 0;
+	}
+
+	bool IsPlaying(int phone)
+	{
+		return GlobalVariables.S != null && GlobalVariables.S.IsLoggedIn(phone);
+	}
+
+	int PlayingCount()
+	{
+		int n = 0;
+		for (int i = 0; i < numPhones; i++)
+			if (IsPlaying(i)) n++;
+		return n;
 	}
 
 	// Digit buttons are key indexes 0-9. Returns -1 when this phone pressed none of them.

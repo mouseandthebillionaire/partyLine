@@ -41,7 +41,7 @@ public class MinigameMenu : MonoBehaviour
         }
         for (int i = 0; i < phoneCount; i++)
         {
-            SetPhoneColor(i, Color.grey);
+            SetPhoneColor(i, new Color(0.2f, 0.2f, 0.2f, 1f));
             SetPhoneDigits(i, "");
         }
 
@@ -64,7 +64,8 @@ public class MinigameMenu : MonoBehaviour
         loggedIn[phone] = true;
         if (GlobalVariables.S.loggedIn != null && phone < GlobalVariables.S.loggedIn.Length)
             GlobalVariables.S.loggedIn[phone] = true;
-        SetPhoneColor(phone, GlobalVariables.S.phoneColors[phone]);
+        // Set to white instead to show the character better
+        SetPhoneColor(phone, Color.white);
         loginSound.pitch = loginPitch;
         loginSound.Play();
         loginPitch += 0.1f;

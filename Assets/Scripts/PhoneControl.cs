@@ -9,16 +9,21 @@ public class PhoneControl : MonoBehaviour
     //    15, // pickup
     //    14, // hangup
     //    13, // yell
+    //    16, // slider
     
     public int phoneNum;
+    public float yellVol;
 
     private string inputString = "";
 
     void Update()
     {
-        if (PhoneInputManager.S == null || GlobalVariables.S == null) return;
+        if (PhoneInputManager.S == null || PhoneInputManager.S.blockGameInput) return;
 
-        
+        ReadYellVol();
+
+        if (GlobalVariables.S == null) return;
+
         // if we are in the menu
         if (GameManager.S.currentState == GameManager.State.MENU)
         {
@@ -61,5 +66,13 @@ public class PhoneControl : MonoBehaviour
                 }
             }
         }
+    }
+
+    void ReadYellVol()
+    {
+        float vol = PhoneInputManager.S.GetSlider(phoneNum);
+        if (Mathf.Abs(vol - yellVol) >= 0.01f)
+            Debug.Log("Phone " + phoneNum + " YELLVOL " + vol.ToString("0.00"));
+        yellVol = vol;
     }
 }
