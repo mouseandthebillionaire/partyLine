@@ -107,6 +107,14 @@ public class TTT : MonoBehaviour {
 
     }
 
+    // Next digit this phone still has to type. -1 once they finish or miss.
+    public int NextKey(int phone)
+    {
+        if (currChar == null || (uint)phone >= (uint)currChar.Length) return -1;
+        if (erred[phone] || currChar[phone] >= wordLength) return -1;
+        return wordNumbers[currChar[phone]];
+    }
+
     // Digit buttons are key indexes 0-9. Ignores the digit this letter actually needs.
     bool PressedOtherDigit(int phone, int expected) {
         for (int key = 0; key <= 9; key++) {

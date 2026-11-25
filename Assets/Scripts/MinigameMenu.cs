@@ -1,8 +1,28 @@
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
+
+public enum HiddenKind
+{
+    Minigame,
+    Scene
+}
+
+// A dial code with no tile on the menu. Minigame opens that slot in the Minigame scene.
+// Scene loads sceneName, for a video or anything else that is not a minigame.
+[Serializable]
+public class HiddenLaunch
+{
+    public string code;
+    public HiddenKind kind;
+    public int minigameIndex;
+    public string sceneName;
+    public Color color = Color.black;
+}
 
 public class MinigameMenu : MonoBehaviour
 {
@@ -10,6 +30,8 @@ public class MinigameMenu : MonoBehaviour
     public string[] minigameNumbers;
     public GameObject[] minigameThumbnails;
     public TextMeshProUGUI[] minigameNumberTexts;
+
+    public HiddenLaunch[] hidden;
 
     public GameObject[] phones;
 
@@ -21,6 +43,7 @@ public class MinigameMenu : MonoBehaviour
     bool[] loggedIn;
     private float loginPitch;
     bool launching;
+    string testCode = "";
 
     static GameObject launchFill;
     
@@ -47,16 +70,111 @@ public class MinigameMenu : MonoBehaviour
             phones[i].transform.Find("Join").GetComponent<Text>().color = Color.white;
         }
 
-        for(int i = 0; i < minigameThumbnails.Length; i++){
-            minigameThumbnails[i].GetComponent<Image>().color = GlobalVariables.S.gameColors[i];
-            minigameThumbnails[i].GetComponentInChildren<TextMeshProUGUI>().text = minigameNumbers[i];
-        }
+        ShowMenuGames();
+
+        if (GameManager.S != null)
+            GameManager.S.LogInAllPhones();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        ReadTestCode();
+    }
+
+    // Keyboard stand-in for dialing a code on a phone.
+    void ReadTestCode()
+    {
+        if (GameManager.S == null || !GameManager.S.testing || launching) return;
+        if (PhoneInputManager.S != null && PhoneInputManager.S.blockGameInput) return;
+
+        bool changed = false;
+        if (Input.GetKeyDown(KeyCode.Backspace) && testCode.Length > 0)
+        {
+            testCode = testCode.Substring(0, testCode.Length - 1);
+            changed = true;
+        }
+
+        string typed = Input.inputString;
+        for (int i = 0; i < typed.Length; i++)
+        {
+            char c = typed[i];
+            if ((c >= '0' && c <= '9') || c == '#' || c == '*')
+            {
+                testCode += c;
+                changed = true;
+            }
+        }
+
+        if (changed)
+        {
+            Debug.Log("Testing " + testCode);
+            if (phones != null && phones.Length > 0)
+                SetPhoneDigits(0, testCode);
+        }
+
+        if (testCode.Length == 0) return;
+        if (!Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.KeypadEnter)) return;
+
+        if (TryDial(testCode))
+        {
+            Debug.Log("Testing launch " + testCode);
+            testCode = "";
+            return;
+        }
+
+        Debug.Log("No minigame for " + testCode);
+    }
+
+    // Tiles on the board only. Hidden codes are not in this list, so they never need a thumbnail or a color.
+    void ShowMenuGames()
+    {
+        if (minigameThumbnails == null || minigameNumbers == null) return;
+
+        int colors = GlobalVariables.S != null && GlobalVariables.S.gameColors != null
+            ? GlobalVariables.S.gameColors.Length : 0;
+        int shown = Mathf.Min(minigameThumbnails.Length, minigameNumbers.Length);
+
+        for (int i = 0; i < shown; i++)
+        {
+            GameObject thumbnail = minigameThumbnails[i];
+            if (thumbnail == null) continue;
+
+            if (i < colors)
+            {
+                Image image = thumbnail.GetComponent<Image>();
+                if (image != null)
+                    image.color = GlobalVariables.S.gameColors[i];
+            }
+
+            TextMeshProUGUI label = thumbnail.GetComponentInChildren<TextMeshProUGUI>();
+            if (label != null)
+                label.text = minigameNumbers[i];
+        }
+    }
+
+    public bool TryDial(string code)
+    {
+        if (minigameNumbers != null)
+        {
+            for (int i = 0; i < minigameNumbers.Length; i++)
+            {
+                if (code != minigameNumbers[i]) continue;
+                LaunchMinigame(i);
+                return true;
+            }
+        }
+
+        if (hidden == null) return false;
+        for (int i = 0; i < hidden.Length; i++)
+        {
+            HiddenLaunch entry = hidden[i];
+            if (entry == null || code != entry.code) continue;
+            LaunchHidden(entry);
+            return true;
+        }
+
+        return false;
     }
 
     public void LogIn(int phone)
@@ -125,11 +243,29 @@ public class MinigameMenu : MonoBehaviour
 
     public void LaunchMinigame(int minigameIndex)
     {
-        if (launching) return;
+        if (launching || GameManager.S == null) return;
         launching = true;
         GameManager.S.currentMinigame = minigameIndex;
         GameManager.S.currentState = GameManager.State.MINIGAME;
+        if (GlobalVariables.S != null && GlobalVariables.S.gameColors != null
+            && (uint)minigameIndex < (uint)GlobalVariables.S.gameColors.Length)
+            GameManager.S.launchColor = GlobalVariables.S.gameColors[minigameIndex];
         StartCoroutine(FillThenLaunch(minigameIndex));
+    }
+
+    void LaunchHidden(HiddenLaunch entry)
+    {
+        if (launching || GameManager.S == null || entry == null) return;
+
+        string sceneName = entry.kind == HiddenKind.Scene ? entry.sceneName : "Minigame";
+        if (string.IsNullOrEmpty(sceneName)) return;
+
+        launching = true;
+        GameManager.S.launchColor = entry.color;
+        GameManager.S.currentState = GameManager.State.MINIGAME;
+        if (entry.kind == HiddenKind.Minigame)
+            GameManager.S.currentMinigame = entry.minigameIndex;
+        StartCoroutine(FillColorThenLoad(entry.color, sceneName));
     }
 
     // Drops the full-screen color left behind by a launch, including one that survived the scene change.
@@ -150,6 +286,54 @@ public class MinigameMenu : MonoBehaviour
             yield return GrowThumbnail(thumbnail);
 
         SceneManager.LoadScene("Minigame");
+    }
+
+    IEnumerator FillColorThenLoad(Color color, string sceneName)
+    {
+        Canvas canvas = MenuCanvas();
+        GameObject temp = null;
+        if (canvas != null)
+        {
+            temp = new GameObject("HiddenLaunchSource", typeof(RectTransform), typeof(Image));
+            temp.transform.SetParent(canvas.transform, false);
+            Image image = temp.GetComponent<Image>();
+            image.color = color;
+            image.raycastTarget = false;
+            RectTransform rect = temp.GetComponent<RectTransform>();
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(160f, 160f);
+            yield return GrowThumbnail(temp);
+        }
+
+        if (temp != null)
+            Destroy(temp);
+        SceneManager.LoadScene(sceneName);
+    }
+
+    Canvas MenuCanvas()
+    {
+        if (minigameThumbnails != null)
+        {
+            for (int i = 0; i < minigameThumbnails.Length; i++)
+            {
+                if (minigameThumbnails[i] == null) continue;
+                Canvas canvas = minigameThumbnails[i].GetComponentInParent<Canvas>();
+                if (canvas != null) return canvas;
+            }
+        }
+
+        if (phones != null)
+        {
+            for (int i = 0; i < phones.Length; i++)
+            {
+                if (phones[i] == null) continue;
+                Canvas canvas = phones[i].GetComponentInParent<Canvas>();
+                if (canvas != null) return canvas;
+            }
+        }
+
+        return null;
     }
 
     IEnumerator GrowThumbnail(GameObject thumbnail)

@@ -57,13 +57,9 @@ public class PhoneControl : MonoBehaviour
 
             MinigameMenu.S.SetPhoneDigits(phoneNum, inputString);
 
-            for (int i = 0; i < MinigameMenu.S.minigameNumbers.Length; i++){
-                if (inputString == MinigameMenu.S.minigameNumbers[i]){
-                    inputString = "";
-                    Debug.Log("Phone " + phoneNum + " pressed " + MinigameMenu.S.minigameNumbers[i]);
-                    MinigameMenu.S.LaunchMinigame(i);
-                    return;
-                }
+            if (MinigameMenu.S.TryDial(inputString)){
+                Debug.Log("Phone " + phoneNum + " pressed " + inputString);
+                inputString = "";
             }
         }
     }

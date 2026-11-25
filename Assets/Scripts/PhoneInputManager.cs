@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.Rendering;
+using Random = UnityEngine.Random;
 
 // Teensy phoneStick joysticks → phone buttons. Same firmware on every board;
 // phone index is assigned here (auto, or override via phoneDeviceIds).
@@ -51,6 +52,16 @@ public class PhoneInputManager : MonoBehaviour
     readonly bool[] _yellWas = new bool[MaxPhones];
     readonly bool[] _yellDown = new bool[MaxPhones];
     readonly List<InputDevice> _sticks = new List<InputDevice>();
+
+    // Filled while documenting, for phones that have no handset plugged in.
+    readonly float[] _demoLevel = new float[MaxPhones];
+    readonly float[] _nextTap = new float[MaxPhones];
+    readonly int[] _typed = new int[MaxPhones];
+    readonly bool[] _tapped = new bool[MaxPhones];
+    int _demoKind = -1;
+    int _demoRound = -1;
+    float _demoStart;
+    float _ringStart = -1f;
 
     void Awake()
     {
@@ -398,6 +409,9 @@ public class PhoneInputManager : MonoBehaviour
 
     void Update()
     {
+        if (DocumentingNow())
+            PlanDemo();
+
         int phones = PhoneCount();
         string[] keyNames = GlobalVariables.S != null ? GlobalVariables.S.keyNames : null;
 
@@ -429,6 +443,9 @@ public class PhoneInputManager : MonoBehaviour
                 }
             }
         }
+
+        if (DocumentingNow())
+            PlayDemoButtons();
     }
 
     public bool GetButtonDown(int phoneNum, int buttonIndex)
@@ -463,6 +480,8 @@ public class PhoneInputManager : MonoBehaviour
     public float GetSlider(int phoneNum)
     {
         if ((uint)phoneNum >= MaxPhones) return 0f;
+        if (DocumentingNow() && PhoneIn(phoneNum) && _sliders[phoneNum] == null)
+            return _demoLevel[phoneNum];
         var axis = _sliders[phoneNum];
         if (axis == null) return 0f;
         return Mathf.Clamp01((axis.ReadUnprocessedValue() + 1f) * 0.5f);
@@ -472,5 +491,244 @@ public class PhoneInputManager : MonoBehaviour
     {
         if ((uint)phoneNum >= MaxPhones) return false;
         return _devices[phoneNum] != null;
+    }
+
+    enum DocKind
+    {
+        Idle,
+        YellHold,
+        Whisper,
+        Blow,
+        YellPulse,
+        Mash,
+        Draw,
+        Maths,
+        Quiz,
+        Type,
+        Price,
+        Bugs
+    }
+
+    bool DocumentingNow()
+    {
+        return !blockGameInput
+            && GameManager.S != null
+            && GameManager.S.documenting
+            && GameManager.S.currentState == GameManager.State.MINIGAME;
+    }
+
+    bool PhoneIn(int phone)
+    {
+        return GlobalVariables.S != null && GlobalVariables.S.IsLoggedIn(phone);
+    }
+
+    void PlanDemo()
+    {
+        int kind = DetectKind();
+        if (kind != _demoKind)
+        {
+            _demoKind = kind;
+            _demoRound = -1;
+            _demoStart = Time.time;
+            _ringStart = -1f;
+            for (int i = 0; i < MaxPhones; i++)
+            {
+                _nextTap[i] = 0f;
+                _typed[i] = 0;
+                _tapped[i] = false;
+                _demoLevel[i] = 0f;
+            }
+        }
+
+        int phones = PhoneCount();
+        for (int phone = 0; phone < phones; phone++)
+        {
+            if (!PhoneIn(phone) || _sliders[phone] != null)
+            {
+                _demoLevel[phone] = 0f;
+                continue;
+            }
+            _demoLevel[phone] = DemoLevel(phone);
+        }
+    }
+
+    void PlayDemoButtons()
+    {
+        int phones = PhoneCount();
+        var kind = (DocKind)_demoKind;
+        var mash = kind == DocKind.Mash ? FindAnyObjectByType<ButtonMasher>() : null;
+        var draw = kind == DocKind.Draw ? FindAnyObjectByType<FastestDraw>() : null;
+        var maths = kind == DocKind.Maths ? FindAnyObjectByType<Maths>() : null;
+        var quiz = kind == DocKind.Quiz ? FindAnyObjectByType<Quizshow>() : null;
+        var typing = kind == DocKind.Type ? FindAnyObjectByType<TTT>() : null;
+
+        for (int phone = 0; phone < phones; phone++)
+        {
+            if (!PhoneIn(phone) || _devices[phone] != null) continue;
+            switch (kind)
+            {
+                case DocKind.Blow:
+                    if (Due(phone, 1.15f + phone * 0.22f))
+                        Tap(phone, 11);
+                    break;
+                case DocKind.Mash:
+                    PlayMash(phone, mash);
+                    break;
+                case DocKind.Draw:
+                    PlayDraw(phone, draw);
+                    break;
+                case DocKind.Maths:
+                    if (maths != null)
+                        PlayAnswer(phone, maths.AnswerKey, maths.Round, maths.Accepting);
+                    break;
+                case DocKind.Quiz:
+                    if (quiz != null)
+                        PlayAnswer(phone, quiz.AnswerKey, quiz.Round, quiz.Accepting);
+                    break;
+                case DocKind.Type:
+                    PlayType(phone, typing);
+                    break;
+                case DocKind.Price:
+                    PlayPrice(phone);
+                    break;
+                case DocKind.Bugs:
+                    if (Due(phone, 0.32f + phone * 0.05f))
+                        Tap(phone, Random.Range(0, 12));
+                    break;
+            }
+        }
+    }
+
+    int DetectKind()
+    {
+        if (FindAnyObjectByType<Yeeell>() != null) return (int)DocKind.YellHold;
+        if (FindAnyObjectByType<Whisper>() != null) return (int)DocKind.Whisper;
+        if (FindAnyObjectByType<balloonBlow>() != null) return (int)DocKind.Blow;
+        if (FindAnyObjectByType<Skiier>() != null
+            || FindAnyObjectByType<DDRawr>() != null
+            || FindAnyObjectByType<SayIt>() != null)
+            return (int)DocKind.YellPulse;
+        if (FindAnyObjectByType<ButtonMasher>() != null) return (int)DocKind.Mash;
+        if (FindAnyObjectByType<FastestDraw>() != null) return (int)DocKind.Draw;
+        if (FindAnyObjectByType<Maths>() != null) return (int)DocKind.Maths;
+        if (FindAnyObjectByType<Quizshow>() != null) return (int)DocKind.Quiz;
+        if (FindAnyObjectByType<TTT>() != null) return (int)DocKind.Type;
+        if (FindAnyObjectByType<PriceMatch>() != null) return (int)DocKind.Price;
+        if (FindAnyObjectByType<BugSquasher>() != null) return (int)DocKind.Bugs;
+        return (int)DocKind.Idle;
+    }
+
+    float DemoLevel(int phone)
+    {
+        switch ((DocKind)_demoKind)
+        {
+            case DocKind.YellHold:
+                return Time.time < _demoStart + 1.4f + phone * 0.55f ? 0.9f : 0f;
+            case DocKind.Whisper:
+                float band = 0.14f + phone * 0.025f;
+                float wobble = Mathf.Sin(Time.time * (1.2f + phone * 0.17f)) * 0.025f;
+                return Mathf.Clamp(band + wobble, 0.12f, 0.32f);
+            case DocKind.Blow:
+                float wave = Mathf.Sin(Time.time * (0.65f + phone * 0.13f) + phone * 1.3f);
+                return Mathf.Lerp(0.08f, 0.72f, wave * 0.5f + 0.5f);
+            case DocKind.YellPulse:
+                float period = 0.7f + phone * 0.11f;
+                float phase = Mathf.Repeat(Time.time + phone * 0.19f, period);
+                return phase < 0.2f ? 0.92f : 0.04f;
+            default:
+                return 0f;
+        }
+    }
+
+    void PlayMash(int phone, ButtonMasher game)
+    {
+        if (game == null || game.number == null) return;
+        if (!int.TryParse(game.number.text, out int key)) return;
+        if (Due(phone, 0.09f + phone * 0.02f))
+            Tap(phone, Mathf.Clamp(key, 0, 9));
+    }
+
+    void PlayDraw(int phone, FastestDraw game)
+    {
+        if (game == null || game.ring == null || !game.ring.isPlaying)
+        {
+            _ringStart = -1f;
+            return;
+        }
+
+        if (_ringStart < 0f)
+            _ringStart = Time.time;
+        if (_tapped[phone]) return;
+        if (Time.time < _ringStart + 0.08f + phone * 0.12f) return;
+        _tapped[phone] = true;
+        Tap(phone, 12);
+    }
+
+    void PlayAnswer(int phone, int answer, int round, bool accepting)
+    {
+        if (round != _demoRound)
+        {
+            _demoRound = round;
+            _demoStart = Time.time;
+            for (int i = 0; i < MaxPhones; i++)
+                _tapped[i] = false;
+        }
+
+        if (!accepting || _tapped[phone]) return;
+        int players = PhoneCount();
+        if (players <= 0) return;
+
+        bool mine = phone == Mod(answer, players);
+        // Wrong guesses land first. The phone that has the answer follows them.
+        if (Time.time < _demoStart + (mine ? 0.95f : 0.4f + phone * 0.06f)) return;
+        _tapped[phone] = true;
+        Tap(phone, Mathf.Clamp(mine ? answer : (answer + 1 + phone) % 10, 0, 9));
+    }
+
+    void PlayType(int phone, TTT game)
+    {
+        if (game == null) return;
+        int key = game.NextKey(phone);
+        if (key < 0) return;
+        if (Due(phone, 0.32f + phone * 0.06f))
+            Tap(phone, Mathf.Clamp(key, 0, 9));
+    }
+
+    void PlayPrice(int phone)
+    {
+        if (!Due(phone, 0.38f)) return;
+        if (_typed[phone] < 3)
+        {
+            Tap(phone, (_typed[phone] * 3 + phone) % 10);
+            _typed[phone]++;
+            return;
+        }
+
+        if (_typed[phone] == 3)
+        {
+            Tap(phone, 11);
+            _typed[phone]++;
+        }
+    }
+
+    void Tap(int phone, int key)
+    {
+        if ((uint)phone >= MaxPhones || (uint)key >= NumButtons) return;
+        _downThisFrame[phone, key] = true;
+        _isHeld[phone, key] = true;
+    }
+
+    bool Due(int phone, float interval)
+    {
+        if (Time.time < _nextTap[phone]) return false;
+        _nextTap[phone] = Time.time + interval;
+        return true;
+    }
+
+    static int Mod(int value, int length)
+    {
+        if (length <= 0) return 0;
+        int m = value % length;
+        return m < 0 ? m + length : m;
     }
 }

@@ -3,6 +3,15 @@
 public class GameManager : MonoBehaviour
 {    
     public int currentMinigame;
+
+    // Backdrop used when a dialed game has no entry in gameColors.
+    public Color launchColor = Color.black;
+
+    // Signs every phone in on the menu, then plays the minigame for phones with no handset.
+    public bool documenting;
+
+    // On the menu, type a minigame number and press return to launch it.
+    public bool testing;
     
     public static GameManager S;
     
@@ -30,5 +39,13 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         
+    }
+
+    // Menu setup clears logins first, then calls this.
+    public void LogInAllPhones()
+    {
+        if (!documenting || MinigameMenu.S == null || MinigameMenu.S.phones == null) return;
+        for (int i = 0; i < MinigameMenu.S.phones.Length; i++)
+            MinigameMenu.S.LogIn(i);
     }
 }

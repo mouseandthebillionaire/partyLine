@@ -163,6 +163,11 @@ public class Quizshow : MonoBehaviour
 		deckIndex = 0;
 	}
 
+	public int AnswerKey => correctKey;
+	public int Round => currentQuestion;
+	public bool Accepting => running && unanswered != null
+		&& (uint)currentQuestion < (uint)unanswered.Length && unanswered[currentQuestion];
+
 	bool IsPlaying(int phone)
 	{
 		return GlobalVariables.S != null && GlobalVariables.S.IsLoggedIn(phone);

@@ -69,16 +69,23 @@ public class MinigameManager : MonoBehaviour
 
     private void LoadMinigame() {
 
-        game = minigames[testMode ? testMinigame : GameManager.S.currentMinigame];
-        currentMinigame = testMode ? testMinigame : GameManager.S.currentMinigame;
-        // Set the Background Color (Camera.main.backgroundColor)
-        Camera.main.backgroundColor = GlobalVariables.S.gameColors[currentMinigame];
+        int index = testMode ? testMinigame : GameManager.S.currentMinigame;
+        currentMinigame = index;
+        game = minigames != null && (uint)index < (uint)minigames.Length ? minigames[index] : null;
+
+        Color backdrop = GameManager.S != null ? GameManager.S.launchColor : Color.black;
+        if (GlobalVariables.S != null && GlobalVariables.S.gameColors != null
+            && (uint)index < (uint)GlobalVariables.S.gameColors.Length)
+            backdrop = GlobalVariables.S.gameColors[index];
+        Camera.main.backgroundColor = backdrop;
         MinigameMenu.ClearLaunchFill();
     }
 
 	private IEnumerator ShowTitle() {
         // Show the title text
-        gameTitle.GetComponent<TextMeshProUGUI>().text = minigameNames[currentMinigame];
+        string title = minigameNames != null && (uint)currentMinigame < (uint)minigameNames.Length
+            ? minigameNames[currentMinigame] : "";
+        gameTitle.GetComponent<TextMeshProUGUI>().text = title;
         // Randomly rotate the title slightly
         gameTitle.transform.rotation = Quaternion.Euler(0, 0, Random.Range(-20f, 20f));
 		gameTitle.SetActive(false);
@@ -87,8 +94,9 @@ public class MinigameManager : MonoBehaviour
 		gameTitle.SetActive(true);
         // Announce the title (eventually)
         // Get the announcement for the current minigame
-        AudioClip announcement = gameAnnouncements[currentMinigame];
-        if (announcement != null) {
+        AudioClip announcement = gameAnnouncements != null && (uint)currentMinigame < (uint)gameAnnouncements.Length
+            ? gameAnnouncements[currentMinigame] : null;
+        if (announcement != null && announcer != null) {
             announcer.clip = announcement;
             announcer.Play();
         }
@@ -99,6 +107,7 @@ public class MinigameManager : MonoBehaviour
 	}
 
     private void LaunchGame() {
+        if (game == null) return;
         game.SetActive(true);
         ShowInputDisplay();
 

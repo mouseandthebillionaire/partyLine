@@ -13,6 +13,9 @@ MonoBehaviour:
   m_Name: PriceCatalog
   m_EditorClassIdentifier: Assembly-CSharp::PriceCatalog
   items:
+  - itemName: Video Camera
+    image: {fileID: 21300000, guid: 51a385b68cd6f47868c39ce0833ffda5, type: 3}
+    price: 899.99
   - itemName: Yow Cola
     image: {fileID: 21300000, guid: 1cfe3fd58cc9941ec8c82defaeec16be, type: 3}
     price: 2.99

@@ -885,6 +885,12 @@ MonoBehaviour:
   - {fileID: 1170329297}
   - {fileID: 195448138}
   minigameNumberTexts: []
+  hidden:
+  - code: 926
+    kind: 0
+    minigameIndex: 12
+    sceneName: 
+    color: {r: 0.20790316, g: 0.50428396, b: 0.6037736, a: 0}
   phones:
   - {fileID: 1020245733}
   - {fileID: 93115449}
@@ -3471,6 +3477,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   currentMinigame: 0
+  launchColor: {r: 0, g: 0, b: 0, a: 1}
+  documenting: 1
+  testing: 1
   currentState: 0
 --- !u!224 &1984053272 stripped
 RectTransform:
